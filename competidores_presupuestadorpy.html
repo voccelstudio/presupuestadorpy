@@ -1,0 +1,314 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-sans);}
+.wrap{padding:16px 0;}
+.header{margin-bottom:20px;}
+.title{font-size:18px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px;}
+.sub{font-size:13px;color:var(--color-text-secondary);}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:18px;}
+.leg{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--color-text-secondary);}
+.dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+.dot.us{background:#3B8BD4;}
+.dot.cype{background:#9F77DD;}
+.dot.costos{background:#D4537E;}
+.dot.mandua{background:#1D9E75;}
+.section-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-tertiary);padding:10px 0 6px;border-top:0.5px solid var(--color-border-tertiary);margin-top:4px;}
+.section-label:first-of-type{border-top:none;margin-top:0;}
+.row{display:grid;grid-template-columns:1fr 56px 56px 56px 56px;gap:4px;align-items:center;padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary);}
+.row:last-child{border-bottom:none;}
+.feat{font-size:13px;color:var(--color-text-primary);}
+.feat small{font-size:11px;color:var(--color-text-secondary);display:block;margin-top:1px;}
+.col-hdr{font-size:10px;font-weight:500;text-align:center;color:var(--color-text-secondary);line-height:1.3;}
+.cell{display:flex;align-items:center;justify-content:center;}
+.yes{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;}
+.yes.us{background:rgba(59,139,212,.18);color:#185FA5;}
+.yes.cype{background:rgba(159,119,221,.18);color:#534AB7;}
+.yes.costos{background:rgba(212,83,126,.18);color:#993556;}
+.yes.mandua{background:rgba(29,158,117,.18);color:#0F6E56;}
+.no{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--color-text-tertiary);background:var(--color-background-secondary);}
+.par{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#BA7517;background:rgba(186,117,23,.12);}
+.score-row{display:grid;grid-template-columns:1fr 56px 56px 56px 56px;gap:4px;padding:10px 0 4px;border-top:2px solid var(--color-border-primary);margin-top:6px;}
+.score-lbl{font-size:12px;font-weight:500;color:var(--color-text-primary);}
+.score-val{text-align:center;font-size:13px;font-weight:500;}
+.score-val.us{color:#185FA5;}
+.score-val.cype{color:#534AB7;}
+.score-val.costos{color:#993556;}
+.score-val.mandua{color:#0F6E56;}
+.bar-wrap{margin-top:20px;}
+.bar-title{font-size:13px;color:var(--color-text-secondary);margin-bottom:10px;}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.bar-name{font-size:12px;color:var(--color-text-secondary);width:120px;flex-shrink:0;}
+.bar-track{flex:1;background:var(--color-background-secondary);border-radius:4px;height:20px;overflow:hidden;position:relative;}
+.bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding:0 8px;transition:width 1s ease;}
+.bar-fill span{font-size:11px;font-weight:500;white-space:nowrap;}
+.bar-fill.us{background:rgba(59,139,212,.25);color:#185FA5;}
+.bar-fill.cype{background:rgba(159,119,221,.22);color:#534AB7;}
+.bar-fill.costos{background:rgba(212,83,126,.2);color:#993556;}
+.bar-fill.mandua{background:rgba(29,158,117,.2);color:#0F6E56;}
+.opp-box{margin-top:20px;background:rgba(59,139,212,.07);border:0.5px solid rgba(59,139,212,.25);border-radius:8px;padding:12px 14px;}
+.opp-title{font-size:12px;font-weight:500;color:#185FA5;margin-bottom:7px;text-transform:uppercase;letter-spacing:.05em;}
+.opp-item{font-size:12px;color:var(--color-text-secondary);display:flex;gap:6px;margin-bottom:4px;}
+.opp-item::before{content:"→";color:#185FA5;flex-shrink:0;}
+</style>
+<div class="wrap">
+  <div class="header">
+    <div class="title">Análisis competitivo — mercado Paraguay</div>
+    <div class="sub">PresupuestadorPY vs. competidores del sector construcción</div>
+  </div>
+
+  <div class="legend">
+    <div class="leg"><div class="dot us"></div>PresupuestadorPY (nosotros)</div>
+    <div class="leg"><div class="dot cype"></div>CYPE Generador de Precios PY</div>
+    <div class="leg"><div class="dot costos"></div>Revista Costos (costos.com.py)</div>
+    <div class="leg"><div class="dot mandua"></div>Mandua (mandua.com.py)</div>
+  </div>
+
+  <div class="row" style="padding-bottom:4px;">
+    <div></div>
+    <div class="col-hdr" style="color:#185FA5">Nosotros</div>
+    <div class="col-hdr" style="color:#534AB7">CYPE PY</div>
+    <div class="col-hdr" style="color:#993556">Costos</div>
+    <div class="col-hdr" style="color:#0F6E56">Mandua</div>
+  </div>
+
+  <div class="section-label">Presupuestos y cómputo</div>
+
+  <div class="row">
+    <div class="feat">Armado de presupuestos online<small>Agregar ítems, cantidades, totales</small></div>
+    <div class="cell"><div class="yes us">✓</div></div>
+    <div class="cell"><div class="yes cype">✓</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+  </div>
+  <div class="row">
+    <div class="feat">Cómputo de materiales automático<small>Cemento en bolsas, materiales sumados</small></div>
+    <div class="cell"><div class="yes us">✓</div></div>
+    <div class="cell"><div class="yes cype">✓</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+  </div>
+  <div class="row">
+    <div class="feat">Plantillas de obra predefinidas<small>Casa económica, dúplex, local comercial</small></div>
+    <div class="cell"><div class="yes us">✓</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+  </div>
+  <div class="row">
+    <div class="feat">Ítems personalizados<small>Agregar rubros fuera de la base</small></div>
+    <div class="cell"><div class="yes us">✓</div></div>
+    <div class="cell"><div class="yes cype">✓</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+  </div>
+  <div class="row">
+    <div class="feat">Descuento por ítem<small>% de descuento fila a fila</small></div>
+    <div class="cell"><div class="yes us">✓</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+  </div>
+  <div class="row">
+    <div class="feat">Costo por m² en tiempo real<small>Total ÷ superficie ingresada</small></div>
+    <div class="cell"><div class="yes us">✓</div></div>
+    <div class="cell"><div class="par">~</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+  </div>
+
+  <div class="section-label">Precios y base de datos</div>
+
+  <div class="row">
+    <div class="feat">Precios del mercado paraguayo<small>Materiales y mano de obra locales</small></div>
+    <div class="cell"><div class="yes us">✓</div></div>
+    <div class="cell"><div class="par">~</div></div>
+    <div class="cell"><div class="yes costos">✓</div></div>
+    <div class="cell"><div class="yes mandua">✓</div></div>
+  </div>
+  <div class="row">
+    <div class="feat">Precios editables por usuario<small>Personalizar la DB según proveedor</small></div>
+    <div class="cell"><div class="yes us">✓</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+  </div>
+  <div class="row">
+    <div class="feat">Ajuste global de precios (%)<small>Actualizar toda la DB de una vez</small></div>
+    <div class="cell"><div class="yes us">✓</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+  </div>
+  <div class="row">
+    <div class="feat">Exportar / importar base de datos<small>Backup JSON de precios personalizados</small></div>
+    <div class="cell"><div class="yes us">✓</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+  </div>
+  <div class="row">
+    <div class="feat">Historial comparativo de precios<small>Evolución mes a mes</small></div>
+    <div class="cell"><div class="yes us">✓</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="yes costos">✓</div></div>
+    <div class="cell"><div class="yes mandua">✓</div></div>
+  </div>
+  <div class="row">
+    <div class="feat">Fuentes cruzadas (múltiples guías)<small>Promedio entre 2+ publicaciones</small></div>
+    <div class="cell"><div class="yes us">✓</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+  </div>
+
+  <div class="section-label">Documentos y exportación</div>
+
+  <div class="row">
+    <div class="feat">Generación de PDF profesional<small>6 temas, datos del profesional, IVA</small></div>
+    <div class="cell"><div class="yes us">✓</div></div>
+    <div class="cell"><div class="yes cype">✓</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+  </div>
+  <div class="row">
+    <div class="feat">Exportación Excel / CSV<small>Con desglose mat/MO, notas, IVA</small></div>
+    <div class="cell"><div class="yes us">✓</div></div>
+    <div class="cell"><div class="yes cype">✓</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+  </div>
+  <div class="row">
+    <div class="feat">IVA paraguayo (10% mat / 5% MO)<small>Cálculo separado por tipo</small></div>
+    <div class="cell"><div class="yes us">✓</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+  </div>
+  <div class="row">
+    <div class="feat">Logo del profesional en PDF<small>Personalización de marca</small></div>
+    <div class="cell"><div class="par">~</div></div>
+    <div class="cell"><div class="yes cype">✓</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+  </div>
+
+  <div class="section-label">Gestión y experiencia</div>
+
+  <div class="row">
+    <div class="feat">Dashboard con estadísticas<small>Presupuestos, valores, rubros frecuentes</small></div>
+    <div class="cell"><div class="yes us">✓</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+  </div>
+  <div class="row">
+    <div class="feat">Alertas de vencimiento<small>Presupuestos próximos a vencer</small></div>
+    <div class="cell"><div class="yes us">✓</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+  </div>
+  <div class="row">
+    <div class="feat">Múltiples temas visuales<small>5 temas de app + 6 temas de PDF</small></div>
+    <div class="cell"><div class="yes us">✓</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+  </div>
+  <div class="row">
+    <div class="feat">Perfil del profesional completo<small>RUC, matrícula, redes sociales</small></div>
+    <div class="cell"><div class="yes us">✓</div></div>
+    <div class="cell"><div class="par">~</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+  </div>
+  <div class="row">
+    <div class="feat">Funciona sin internet (offline)<small>HTML autocontenido, sin servidor</small></div>
+    <div class="cell"><div class="yes us">✓</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+  </div>
+  <div class="row">
+    <div class="feat">Gratuito para el usuario<small>Sin suscripción ni licencia</small></div>
+    <div class="cell"><div class="yes us">✓</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+  </div>
+  <div class="row">
+    <div class="feat">Compartir presupuesto por link<small>URL pública para el cliente</small></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+  </div>
+  <div class="row">
+    <div class="feat">Firma digital del cliente<small>Aceptación online del presupuesto</small></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+  </div>
+  <div class="row">
+    <div class="feat">Base de datos de clientes<small>CRM básico por estudio</small></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+    <div class="cell"><div class="no">–</div></div>
+  </div>
+
+  <div class="score-row">
+    <div class="score-lbl">Features implementados</div>
+    <div class="score-val us" id="sc-us">—</div>
+    <div class="score-val cype" id="sc-cype">—</div>
+    <div class="score-val costos" id="sc-costos">—</div>
+    <div class="score-val mandua" id="sc-mandua">—</div>
+  </div>
+
+  <div class="bar-wrap">
+    <div class="bar-title" style="font-size:12px;color:var(--color-text-secondary);margin-bottom:10px;">Cobertura de features (%)</div>
+    <div class="bar-row"><div class="bar-name" style="font-size:12px;color:#185FA5">PresupuestadorPY</div><div class="bar-track"><div class="bar-fill us" id="bar-us" style="width:0%"><span></span></div></div></div>
+    <div class="bar-row"><div class="bar-name" style="font-size:12px;color:#534AB7">CYPE PY</div><div class="bar-track"><div class="bar-fill cype" id="bar-cype" style="width:0%"><span></span></div></div></div>
+    <div class="bar-row"><div class="bar-name" style="font-size:12px;color:#993556">Revista Costos</div><div class="bar-track"><div class="bar-fill costos" id="bar-costos" style="width:0%"><span></span></div></div></div>
+    <div class="bar-row"><div class="bar-name" style="font-size:12px;color:#0F6E56">Mandua</div><div class="bar-track"><div class="bar-fill mandua" id="bar-mandua" style="width:0%"><span></span></div></div></div>
+  </div>
+
+  <div class="opp-box">
+    <div class="opp-title">Oportunidades únicas de PresupuestadorPY</div>
+    <div class="opp-item">Única herramienta con IVA paraguayo separado (10% mat / 5% MO) directo en el presupuesto</div>
+    <div class="opp-item">Precios cruzados de múltiples guías locales — no depende de un solo proveedor</div>
+    <div class="opp-item">Funciona offline — no requiere cuenta, servidor ni internet para operar</div>
+    <div class="opp-item">Dashboard con alertas de vencimiento — funcionalidad de CRM básico sin costo extra</div>
+    <div class="opp-item">Los 3 grandes competidores (CYPE, Costos, Mandua) son publicaciones, no herramientas de gestión</div>
+    <div class="opp-item">Firma digital + link compartible = ventajas pendientes que ningún competidor tiene aún</div>
+  </div>
+</div>
+<script>
+const data = {
+  us:     [1,1,1,1,1,1, 1,1,1,1,1,1, 1,1,1,0, 1,1,1,1,1,1, 0,0,0],
+  cype:   [1,1,0,1,0,0.5, 0.5,0,0,0,0,0, 1,1,0,1, 0,0,0,0.5,0,0, 0,0,0],
+  costos: [0,0,0,0,0,0, 1,0,0,0,1,0, 0,0,0,0, 0,0,0,0,0,0, 0,0,0],
+  mandua: [0,0,0,0,0,0, 1,0,0,0,1,0, 0,0,0,0, 0,0,0,0,0,0, 0,0,0],
+};
+const total = data.us.length;
+function score(arr){ return arr.reduce((s,v)=>s+v,0); }
+const scores = {
+  us: score(data.us), cype: score(data.cype),
+  costos: score(data.costos), mandua: score(data.mandua)
+};
+document.getElementById('sc-us').textContent = scores.us + '/' + total;
+document.getElementById('sc-cype').textContent = scores.cype + '/' + total;
+document.getElementById('sc-costos').textContent = scores.costos + '/' + total;
+document.getElementById('sc-mandua').textContent = scores.mandua + '/' + total;
+
+setTimeout(()=>{
+  ['us','cype','costos','mandua'].forEach(k=>{
+    const pct = Math.round(scores[k]/total*100);
+    const el = document.getElementById('bar-'+k);
+    el.style.width = pct + '%';
+    el.querySelector('span').textContent = pct + '%';
+  });
+},200);
+</script>
