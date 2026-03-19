@@ -647,13 +647,13 @@ let state={
   projectName:"Nuevo Proyecto",clientName:"",clientPhone:"",clientAddress:"",
   profitPct:0,validDays:30,budgetNum:1,notes:"",pdfShowBreakdown:false,
   priceEditMode:"total",editPriceKey:null,editField:"total",activeBudgetId:null,
-  theme:"dark",
+  theme:"slate",
   // IVA
   ivaEnabled:false,ivaEnPDF:false,
   // AJUSTE GLOBAL
   adjustPct:0,
   profile:{company:"",professional:"",matricula:"",ruc:"",phone:"",email:"",address:"",instagram:"",whatsapp:"",website:""},
-  pdfTheme:"corporate",
+  pdfTheme:"minimal",
   budgets:[],
   m2Area:0,
   itemNotes:{},
@@ -1323,8 +1323,8 @@ function generarPDF(){
   y+=32;
   // Info strip
   const stripMsg=state.ivaEnabled&&state.ivaEnPDF
-    ? "Precios unitarios incluyen materiales y mano de obra — IVA incluido (10% mat / 5% MO) — Valores en Guaraníes (₲)"
-    : "Precios unitarios incluyen materiales y mano de obra — Valores en Guaraníes (₲) paraguayos";
+    ? "Precios unitarios incluyen materiales y mano de obra — IVA incluido (10% mat / 5% MO) — Valores en Guaranies (Gs.)"
+    : "Precios unitarios incluyen materiales y mano de obra — Valores en Guaranies (Gs.) paraguayos";
   doc.setFillColor(254,243,199);doc.rect(M,y,W-M*2,6,"F");
   doc.setFontSize(6.5);doc.setFont("helvetica","italic");doc.setTextColor(146,64,14);
   doc.text("  "+stripMsg,M+2,y+4.2);
@@ -1341,8 +1341,8 @@ function generarPDF(){
         {content:item.name,styles:{fontSize:8}},
         {content:item.unit,styles:{halign:"center",fontSize:8}},
         {content:String(item.qty),styles:{halign:"center",fontSize:8}},
-        {content:"₲ "+fmt(item.unitPrice+(state.ivaEnabled&&state.ivaEnPDF?Math.round(ivaItem/item.qty):0)),styles:{halign:"right",fontSize:8}},
-        {content:"₲ "+fmt(totalItem),styles:{halign:"right",fontStyle:"bold",fontSize:8.5}},
+        {content:"Gs. "+fmt(item.unitPrice+(state.ivaEnabled&&state.ivaEnPDF?Math.round(ivaItem/item.qty):0)),styles:{halign:"right",fontSize:7.5}},
+        {content:"Gs. "+fmt(totalItem),styles:{halign:"right",fontStyle:"bold",fontSize:7.5}},
       ]);
     }
   }
@@ -1350,36 +1350,37 @@ function generarPDF(){
     startY:y,
     head:[[{content:"#",styles:{halign:"center"}},{content:"DESCRIPCIÓN / RUBRO"},{content:"UNID.",styles:{halign:"center"}},{content:"CANT.",styles:{halign:"center"}},{content:"PRECIO UNIT.",styles:{halign:"right"}},{content:"TOTAL",styles:{halign:"right"}}]],
     body:rows,theme:"plain",
-    styles:{font:"helvetica",fontSize:8,cellPadding:{top:4,bottom:4,left:4,right:4},lineColor:C.borderC,lineWidth:0.2,textColor:C.bodyTx},
-    headStyles:{fillColor:C.accentBg,textColor:C.accentTx,fontStyle:"bold",fontSize:7,cellPadding:{top:5,bottom:5,left:4,right:4}},
+    styles:{font:"helvetica",fontSize:8,cellPadding:{top:3,bottom:3,left:3,right:3},lineColor:C.borderC,lineWidth:0.2,textColor:C.bodyTx},
+    headStyles:{fillColor:C.accentBg,textColor:C.accentTx,fontStyle:"bold",fontSize:7,cellPadding:{top:4,bottom:4,left:3,right:3}},
     alternateRowStyles:{fillColor:C.altRow},
-    columnStyles:{0:{cellWidth:8,halign:"center"},1:{cellWidth:"auto"},2:{cellWidth:14,halign:"center"},3:{cellWidth:14,halign:"center"},4:{cellWidth:36,halign:"right"},5:{cellWidth:34,halign:"right"}},
+    columnStyles:{0:{cellWidth:7,halign:"center"},1:{cellWidth:"auto"},2:{cellWidth:13,halign:"center"},3:{cellWidth:13,halign:"center"},4:{cellWidth:42,halign:"right"},5:{cellWidth:40,halign:"right"}},
     margin:{left:M,right:M},
+    tableWidth:"wrap",
     didParseCell:data=>{if(data.row.raw?.[0]?.colSpan===6){data.cell.styles.fillColor=C.catBg;data.cell.styles.textColor=C.catTx;data.cell.styles.fontStyle="bold";}},
   });
   y=doc.lastAutoTable.finalY+8;
   // Totals box
-  const totW=96;const totX=W-M-totW;
+  const totW=110;const totX=W-M-totW;
   if(y+40>275){doc.addPage();y=M;}
   doc.setFontSize(8);doc.setFont("helvetica","normal");doc.setTextColor(...C.mutedTx);
   doc.text("Subtotal materiales y mano de obra:",totX,y+5);
-  doc.setTextColor(...C.bodyTx);doc.setFont("helvetica","bold");doc.text("₲ "+fmt(subtotal),W-M,y+5,{align:"right"});y+=8;
+  doc.setTextColor(...C.bodyTx);doc.setFont("helvetica","bold");doc.text("Gs. "+fmt(subtotal),W-M,y+5,{align:"right"});y+=8;
   if(state.ivaEnabled&&state.ivaEnPDF){
     doc.setFont("helvetica","normal");doc.setTextColor(...C.mutedTx);
-    doc.text("IVA materiales (10%):",totX,y+5);doc.setTextColor(79,70,229);doc.setFont("helvetica","bold");doc.text("₲ "+fmt(ivaMat),W-M,y+5,{align:"right"});y+=7;
+    doc.text("IVA materiales (10%):",totX,y+5);doc.setTextColor(79,70,229);doc.setFont("helvetica","bold");doc.text("Gs. "+fmt(ivaMat),W-M,y+5,{align:"right"});y+=7;
     doc.setFont("helvetica","normal");doc.setTextColor(...C.mutedTx);
-    doc.text("IVA mano de obra (5%):",totX,y+5);doc.setTextColor(79,70,229);doc.setFont("helvetica","bold");doc.text("₲ "+fmt(ivaLab),W-M,y+5,{align:"right"});y+=7;
+    doc.text("IVA mano de obra (5%):",totX,y+5);doc.setTextColor(79,70,229);doc.setFont("helvetica","bold");doc.text("Gs. "+fmt(ivaLab),W-M,y+5,{align:"right"});y+=7;
   }
   if(state.profitPct>0){
     doc.setFont("helvetica","normal");doc.setTextColor(...C.mutedTx);
     doc.text("Honorarios profesionales ("+state.profitPct+"%):",totX,y+5);
-    doc.setTextColor(22,163,74);doc.setFont("helvetica","bold");doc.text("₲ "+fmt(profitAmt),W-M,y+5,{align:"right"});y+=8;
+    doc.setTextColor(22,163,74);doc.setFont("helvetica","bold");doc.text("Gs. "+fmt(profitAmt),W-M,y+5,{align:"right"});y+=8;
   }
   doc.setDrawColor(...C.accentBg);doc.setLineWidth(0.6);doc.line(totX,y,W-M,y);y+=2;
   doc.setFillColor(...C.totalBg);doc.roundedRect(totX,y,totW,13,2,2,"F");
-  doc.setTextColor(...C.totalTx);doc.setFont("helvetica","bold");doc.setFontSize(8.5);
+  doc.setTextColor(...C.totalTx);doc.setFont("helvetica","bold");doc.setFontSize(8);
   doc.text("TOTAL"+(state.ivaEnabled&&state.ivaEnPDF?" (IVA inc.)":"")+":",totX+4,y+8);
-  doc.setFontSize(11);doc.text("₲ "+fmt(total),W-M-3,y+8,{align:"right"});y+=19;
+  doc.setFontSize(10);doc.text("Gs. "+fmt(total),W-M-3,y+8,{align:"right"});y+=19;
   // Notes
   if(state.notes&&state.notes.trim()){
     if(y+20>275){doc.addPage();y=M;}
