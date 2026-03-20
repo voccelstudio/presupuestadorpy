@@ -738,6 +738,7 @@ let state={
   logoDataUrl:"",
   signDataUrl:"",
   alertBudgets:[],
+  isPro:false,
 };
 try{const s=localStorage.getItem("ppy_v5");if(s)Object.assign(state,JSON.parse(s));}catch(e){}
 try{const d=localStorage.getItem("ppy_db5");if(d)DB=JSON.parse(d);}catch(e){}
@@ -846,6 +847,11 @@ async function sbLoadBudgets() {
   }
 }
 
+// Admin emails — acceso ilimitado sin restricciones
+const ADMIN_EMAILS = ['voccelstudio@gmail.com'];
+function isAdmin(){ return _user && ADMIN_EMAILS.includes(_user.email); }
+function isPro(){ return isAdmin() || (_user && state.isPro); }
+
 function renderUserChip() {
   const el = document.getElementById('user-chip-area');
   if(!el) return;
@@ -853,11 +859,15 @@ function renderUserChip() {
     const initials = (_user.email||'U').substring(0,2).toUpperCase();
     const email = _user.email||'';
     const short = email.length>18 ? email.substring(0,16)+'…' : email;
+    const badge = isAdmin()
+      ? `<span style="font-size:.75rem;background:rgba(245,158,11,.2);color:var(--acc);border:1px solid rgba(245,158,11,.4);padding:1px 6px;border-radius:999px;font-weight:700">ADMIN</span>`
+      : isPro()
+        ? `<span class="cloud-badge" style="background:rgba(52,211,153,.15);color:var(--ok);border-color:rgba(52,211,153,.3)">⭐ Pro</span>`
+        : `<span class="cloud-badge" style="background:rgba(248,113,113,.1);color:var(--err);border-color:rgba(248,113,113,.3);cursor:pointer" onclick="showModal('subscription')">Sin plan</span>`;
     el.innerHTML = `<div class="user-chip" onclick="showModal('userMenu')">
       <div class="user-avatar">${initials}</div>
       <span>${short}</span>
-    </div>
-    <span class="cloud-badge">☁ Nube</span>`;
+    </div>${badge}`;
   } else {
     el.innerHTML = `<button class="nbtn" onclick="showAuthModal()" style="background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.4);color:var(--acc)">Iniciar sesión</button>`;
   }
@@ -1568,12 +1578,24 @@ function showModal(type){
 
   else if(type==="userMenu"){
     const email=_user?.email||"";
-    el.innerHTML=`<div class="overlay" onclick="if(event.target===this)closeModal()"><div class="modal" style="max-width:320px">
+    const adminPanel=isAdmin()?`
+      <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:var(--rad);padding:12px;margin:10px 0">
+        <div style="font-size:.75rem;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">🔧 Panel Admin</div>
+        <div style="font-size:.875rem;color:var(--tx2);margin-bottom:6px">Activar cuenta Pro por email:</div>
+        <div style="display:flex;gap:6px">
+          <input id="admin-email-input" type="email" placeholder="usuario@email.com" style="flex:1;font-size:.875rem;padding:5px 8px">
+          <button class="btn sm primary" onclick="adminActivatePro()">Activar</button>
+        </div>
+        <div style="font-size:.75rem;color:var(--tx3);margin-top:6px">Esto guarda el email en la lista Pro del sistema.</div>
+      </div>`:
+      isPro()?`<div style="font-size:.875rem;color:var(--ok);margin-top:4px">⭐ Plan Pro activo</div>`
+      :`<div style="font-size:.875rem;color:var(--err);margin-top:4px;cursor:pointer" onclick="closeModal();showModal('subscription')">Sin plan activo — Ver planes ›</div>`;
+    el.innerHTML=`<div class="overlay" onclick="if(event.target===this)closeModal()"><div class="modal" style="max-width:340px">
       <div class="modal-title">Mi cuenta<button class="delbtn" onclick="closeModal()">✕</button></div>
-      <div style="text-align:center;padding:16px 0">
+      <div style="text-align:center;padding:12px 0 4px">
         <div style="width:52px;height:52px;border-radius:50%;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;color:var(--bg);margin:0 auto 10px">${(email||'U').substring(0,2).toUpperCase()}</div>
         <div style="font-weight:600;font-size:.95rem;color:var(--tx)">${email}</div>
-        <div style="font-size:.95rem;color:var(--ok);margin-top:4px">☁ Presupuestos sincronizados en la nube</div>
+        ${adminPanel}
       </div>
       <div class="modal-acts">
         <button class="btn" onclick="sbLoadBudgets();closeModal()">↓ Sincronizar</button>
@@ -1597,21 +1619,16 @@ function showModal(type){
       <div style="font-size:.875rem;color:var(--tx2);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Cómo pagar</div>
       <div class="payment-box">
         <div class="payment-bank">
-          <strong>Transferencia Bancaria</strong><br>
-          Banco: <strong>Banco Continental</strong><br>
-          Cuenta: <strong>0-010-1-001234-5</strong><br>
-          Titular: <strong>VOCCEL Studio SRL</strong><br>
-          RUC: <strong>80123456-7</strong><br><br>
-          <strong>Billetera Digital</strong><br>
-          Tigo Money / Personal Pay: <strong>+595 981 123 456</strong><br>
-          A nombre de: <strong>VOCCEL Studio</strong>
+          <strong>Billetera digital:</strong> muy pronto 🔜<br><br>
+          Por ahora, contactanos por WhatsApp para coordinar el pago:<br>
+          <strong style="font-size:1rem">📱 0992 311 700</strong>
         </div>
       </div>
       <div style="background:var(--ivabg);border:1px solid var(--iva);border-radius:var(--rad);padding:10px 13px;font-size:.875rem;color:var(--tx2);margin-top:8px">
-        📩 Luego de transferir, enviá el comprobante a <strong>hola@voccel.com.py</strong> o por WhatsApp al <strong>+595 981 123 456</strong> y activamos tu cuenta en menos de 24hs.
+        📩 Contactanos por WhatsApp al <strong>+595 992 311 700</strong> o por email a <strong>voccelstudio@gmail.com</strong> y activamos tu cuenta en menos de 3hs.
       </div>
       <div class="modal-acts"><button class="btn" onclick="closeModal()">Cerrar</button>
-        <button class="btn primary" onclick="window.open('https://wa.me/595981123456?text=Hola!+Quiero+activar+PresupuestadorPY+Pro','_blank')">📱 WhatsApp</button>
+        <button class="btn primary" onclick="window.open('https://wa.me/595992311700?text=Hola!+Quiero+activar+PresupuestadorPY+Pro','_blank')">📱 WhatsApp</button>
       </div>
     </div></div>`;
   }
@@ -1893,6 +1910,47 @@ function applyTemplate(idx){
 }
 
 
+
+// ── ADMIN ──────────────────────────────────────────────────────────────────
+async function adminActivatePro(){
+  const emailInput = document.getElementById('admin-email-input');
+  const email = emailInput?.value?.trim();
+  if(!email){toast("Ingresá un email",false);return;}
+  // Save pro user list in Supabase budgets table using a special admin record
+  try{
+    const {error} = await _SB.from('pro_users').upsert({
+      email: email,
+      activated_by: _user.email,
+      activated_at: new Date().toISOString()
+    },{onConflict:'email'});
+    if(error) throw error;
+    toast("✓ " + email + " activado como Pro");
+    if(emailInput) emailInput.value='';
+  } catch(e){
+    // Table might not exist yet — store locally as fallback
+    const proList = JSON.parse(localStorage.getItem('ppy_pro_users')||'[]');
+    if(!proList.includes(email)) proList.push(email);
+    localStorage.setItem('ppy_pro_users', JSON.stringify(proList));
+    toast("✓ " + email + " activado (local)");
+    if(emailInput) emailInput.value='';
+  }
+}
+
+async function checkIfUserIsPro(){
+  if(!_user) return;
+  if(isAdmin()){ state.isPro=true; return; }
+  // Check Supabase pro_users table
+  try{
+    const {data} = await _SB.from('pro_users').select('email').eq('email',_user.email).single();
+    state.isPro = !!data;
+  } catch(e){
+    // Fallback to localStorage
+    const proList = JSON.parse(localStorage.getItem('ppy_pro_users')||'[]');
+    state.isPro = proList.includes(_user.email);
+  }
+  renderUserChip();
+}
+
 // ── MOBILE FAB ──────────────────────────────────────────────────────────────────────────
 let _fabOpen=false;
 function toggleFab(){
@@ -1977,6 +2035,7 @@ renderBudget();updateBadge();
   const {data} = await _SB.auth.getUser();
   if(data?.user){
     _user = data.user;
+    await checkIfUserIsPro();
     renderUserChip();
     await sbLoadBudgets();
   } else {
