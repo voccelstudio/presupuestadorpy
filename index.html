@@ -741,6 +741,8 @@ let state={
   isPro:false,
   proExpired:false,
   proExpiresAt:null,
+  trialUsed:false,
+  trialExportedAt:null,
 };
 try{const s=localStorage.getItem("ppy_v5");if(s)Object.assign(state,JSON.parse(s));}catch(e){}
 try{const d=localStorage.getItem("ppy_db5");if(d)DB=JSON.parse(d);}catch(e){}
@@ -830,6 +832,7 @@ async function sbSignOut() {
 // Guardar presupuestos en Supabase
 async function sbSaveBudgets() {
   if(!_user) return;
+  if(!isPro()){ return; } // sin plan activo, no guardar
   await _SB.from('budgets').upsert({
     user_id: _user.id,
     data: JSON.stringify(state.budgets),
@@ -838,6 +841,7 @@ async function sbSaveBudgets() {
 }
 async function sbLoadBudgets() {
   if(!_user) return;
+  if(!isPro()){ return; } // sin plan activo, no cargar
   const {data} = await _SB.from('budgets').select('data').eq('user_id',_user.id).single();
   if(data?.data) {
     try{
@@ -853,6 +857,22 @@ async function sbLoadBudgets() {
 const ADMIN_EMAILS = ['voccelstudio@gmail.com'];
 function isAdmin(){ return _user && ADMIN_EMAILS.includes(_user.email); }
 function isPro(){ return isAdmin() || (_user && state.isPro); }
+function isTrial(){ return _user && !isPro(); }
+function trialExhausted(){ return isTrial() && state.trialUsed; }
+
+function showTrialExhaustedModal(){
+  const el = document.getElementById('modal-area');
+  el.innerHTML = `<div class="auth-overlay"><div class="auth-box" style="text-align:center">
+    <div style="font-size:2.5rem;margin-bottom:10px">🔒</div>
+    <div style="font-family:var(--font-display);font-size:1.2rem;font-weight:800;color:var(--tx);margin-bottom:8px;text-transform:uppercase">Trial utilizado</div>
+    <div style="font-size:.875rem;color:var(--tx2);line-height:1.6;margin-bottom:18px">
+      Ya utilizaste tu presupuesto de prueba gratuito.<br>
+      <strong style="color:var(--ok)">Tus datos siguen aqui</strong> — activa el plan Pro para seguir generando presupuestos ilimitados.
+    </div>
+    <button onclick="closeModal();showModal('subscription')" style="width:100%;padding:11px;background:var(--acc);color:var(--bg);border:none;border-radius:var(--rad);font-weight:700;font-size:1rem;cursor:pointer;margin-bottom:8px">⭐ Ver plan Pro — Gs. 90.000/mes</button>
+    <button onclick="closeModal()" style="width:100%;padding:8px;background:transparent;border:1px solid var(--bor);border-radius:var(--rad);color:var(--tx3);cursor:pointer;font-size:.875rem">Cerrar</button>
+  </div></div>`;
+}
 
 function renderUserChip() {
   const el = document.getElementById('user-chip-area');
@@ -865,7 +885,9 @@ function renderUserChip() {
       ? `<span style="font-size:.75rem;background:rgba(245,158,11,.2);color:var(--acc);border:1px solid rgba(245,158,11,.4);padding:1px 6px;border-radius:999px;font-weight:700">ADMIN</span>`
       : isPro()
         ? `<span class="cloud-badge" style="background:rgba(52,211,153,.15);color:var(--ok);border-color:rgba(52,211,153,.3)" title="${state.proExpiresAt ? 'Vence: '+new Date(state.proExpiresAt).toLocaleDateString('es-PY') : ''}">⭐ Pro${state.proExpiresAt ? ' · '+Math.ceil((new Date(state.proExpiresAt)-new Date())/86400000)+'d' : ''}</span>`
-        : `<span class="cloud-badge" style="background:rgba(248,113,113,.1);color:var(--err);border-color:rgba(248,113,113,.3);cursor:pointer" onclick="showModal('subscription')">Sin plan</span>`;
+        : state.trialUsed
+          ? `<span class="cloud-badge" style="background:rgba(248,113,113,.1);color:var(--err);border-color:rgba(248,113,113,.3);cursor:pointer" onclick="showModal('subscription')">Trial vencido</span>`
+          : `<span class="cloud-badge" style="background:rgba(129,140,248,.12);color:#818cf8;border-color:rgba(129,140,248,.35);cursor:pointer" onclick="showModal('subscription')">Trial 🎁</span>`;
     el.innerHTML = `<div class="user-chip" onclick="showModal('userMenu')">
       <div class="user-avatar">${initials}</div>
       <span>${short}</span>
@@ -1287,6 +1309,7 @@ function selectTheme(id){state.theme=id;applyTheme(id);save();renderThemes();toa
 
 // ── EXPORT XLS ───────────────────────────────────────────────────────
 function exportXLS(){
+  if(trialExhausted()){showTrialExhaustedModal();return;}
   const{totalMats,totalLabor,subtotal,ivaMat,ivaLab,ivaTotal,profitAmt,total}=getTotals();
   const grouped=getGrouped();
   const BOM="\uFEFF",nl="\r\n",q=v=>`"${String(v).replace(/"/g,'""')}"`;
@@ -1339,7 +1362,15 @@ function exportXLS(){
   const a=document.createElement("a");
   a.href=url;a.download=`Presupuesto_${String(state.budgetNum).padStart(4,"0")}_${(state.clientName||"Cliente").replace(/\s+/g,"_")}.csv`;
   a.click();URL.revokeObjectURL(url);
-  toast("Archivo exportado ✓");closeModal();
+  if(isTrial()){
+    state.trialUsed=true;
+    state.trialExportedAt=new Date().toISOString();
+    save();
+    toast("Exportado ✓ — Trial utilizado");
+    setTimeout(()=>{closeModal();showTrialExhaustedModal();},1200);
+  } else {
+    toast("Archivo exportado ✓");closeModal();
+  }
 }
 
 // ── PDF ────────────────────────────────────────────────────────────────
@@ -1349,7 +1380,8 @@ function pdfTxt(s){
     .replace(/[₲]/g,"Gs.").replace(/[—–]/g,"-").replace(/[""]/g,'"').replace(/['']/g,"'");
 }
 function generarPDF(){
-  if(state.items.length===0){toast("Agregá ítems primero",false);return;}
+  if(state.items.length===0){toast("Agrega items primero",false);return;}
+  if(trialExhausted()){showTrialExhaustedModal();return;}
   if(typeof window.jspdf==="undefined"&&typeof jsPDF==="undefined"){toast("jsPDF cargando, intentá en 2 segundos",false);return;}
   const{jsPDF:JPDF}=window.jspdf||{jsPDF:window.jsPDF};
   const doc=new JPDF({orientation:"portrait",unit:"mm",format:"a4"});
@@ -1501,7 +1533,18 @@ function generarPDF(){
     doc.text("Pagina "+i+" de "+pages,W-M,292,{align:"right"});
   }
   const fn="Presupuesto_"+String(state.budgetNum).padStart(4,"0")+"_"+(state.clientName||"Cliente").replace(/\s+/g,"_")+".pdf";
-  doc.save(fn);toast("PDF generado ✓");
+  doc.save(fn);
+  if(isTrial()){
+    state.trialUsed=true;
+    state.trialExportedAt=new Date().toISOString();
+    save();
+    setTimeout(()=>{
+      toast("PDF generado ✓ — Trial utilizado");
+      setTimeout(()=>showTrialExhaustedModal(),1500);
+    },300);
+  } else {
+    toast("PDF generado ✓");
+  }
 }
 
 // ── MODALS ────────────────────────────────────────────────────────────
@@ -1983,26 +2026,49 @@ async function checkIfUserIsPro(){
 // ── SUBSCRIPTION WARNING & BLOCK ─────────────────────────────────────────────
 function checkSubscriptionWarning(){
   if(!_user || isAdmin()) return;
-  // Remove any existing warning
+  // Remove any existing warning bar
   const existing = document.getElementById('sub-warning-bar');
   if(existing) existing.remove();
 
-  if(state.proExpired){
+  // Usuario sin plan activo
+  if(!state.isPro || state.proExpired){
+    // Si es trial no utilizado todavia, mostrar banner de trial en vez de bloqueo total
+    if(!state.proExpired && !state.trialUsed){
+      showTrialBanner();
+      return;
+    }
+    // Trial ya utilizado o plan vencido → bloqueo
     showSubscriptionBlock();
     return;
   }
-  if(!state.proExpiresAt) return;
 
+  // Usuario con plan activo → verificar dias restantes
+  if(!state.proExpiresAt) return;
   const expires = new Date(state.proExpiresAt);
   const today = new Date();
   const daysLeft = Math.ceil((expires - today) / 86400000);
 
-  // Aviso desde dia 5 restantes
   if(daysLeft <= 5 && daysLeft > 0){
-    showSubscriptionBanner(daysLeft, 'urgent');
+    showSubscriptionBanner(daysLeft, 'urgent'); // rojo
   } else if(daysLeft <= 25 && daysLeft > 5){
-    showSubscriptionBanner(daysLeft, 'warn');
+    showSubscriptionBanner(daysLeft, 'warn');   // amarillo
   }
+}
+
+
+function showTrialBanner(){
+  const existing = document.getElementById('sub-warning-bar');
+  if(existing) existing.remove();
+  const bar = document.createElement('div');
+  bar.id = 'sub-warning-bar';
+  bar.style.cssText = `position:fixed;top:52px;left:0;right:0;z-index:90;padding:7px 16px;display:flex;align-items:center;justify-content:space-between;font-size:.875rem;font-weight:600;background:rgba(129,140,248,.12);border-bottom:1px solid rgba(129,140,248,.35);color:#818cf8;`;
+  bar.innerHTML = `
+    <span>🎁 Estas usando el <strong>trial gratuito</strong> — 1 exportacion incluida. Luego se activa el plan Pro.</span>
+    <button onclick="showModal('subscription')" style="padding:3px 12px;border-radius:999px;border:1px solid currentColor;background:transparent;color:inherit;cursor:pointer;font-weight:700;font-size:.8rem;white-space:nowrap">Ver Pro</button>
+  `;
+  const app = document.getElementById('app');
+  const budget = document.getElementById('section-budget');
+  app.insertBefore(bar, budget);
 }
 
 function showSubscriptionBanner(daysLeft, level){
