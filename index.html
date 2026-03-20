@@ -739,6 +739,8 @@ let state={
   signDataUrl:"",
   alertBudgets:[],
   isPro:false,
+  proExpired:false,
+  proExpiresAt:null,
 };
 try{const s=localStorage.getItem("ppy_v5");if(s)Object.assign(state,JSON.parse(s));}catch(e){}
 try{const d=localStorage.getItem("ppy_db5");if(d)DB=JSON.parse(d);}catch(e){}
@@ -862,7 +864,7 @@ function renderUserChip() {
     const badge = isAdmin()
       ? `<span style="font-size:.75rem;background:rgba(245,158,11,.2);color:var(--acc);border:1px solid rgba(245,158,11,.4);padding:1px 6px;border-radius:999px;font-weight:700">ADMIN</span>`
       : isPro()
-        ? `<span class="cloud-badge" style="background:rgba(52,211,153,.15);color:var(--ok);border-color:rgba(52,211,153,.3)">⭐ Pro</span>`
+        ? `<span class="cloud-badge" style="background:rgba(52,211,153,.15);color:var(--ok);border-color:rgba(52,211,153,.3)" title="${state.proExpiresAt ? 'Vence: '+new Date(state.proExpiresAt).toLocaleDateString('es-PY') : ''}">⭐ Pro${state.proExpiresAt ? ' · '+Math.ceil((new Date(state.proExpiresAt)-new Date())/86400000)+'d' : ''}</span>`
         : `<span class="cloud-badge" style="background:rgba(248,113,113,.1);color:var(--err);border-color:rgba(248,113,113,.3);cursor:pointer" onclick="showModal('subscription')">Sin plan</span>`;
     el.innerHTML = `<div class="user-chip" onclick="showModal('userMenu')">
       <div class="user-avatar">${initials}</div>
@@ -1582,11 +1584,14 @@ function showModal(type){
       <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:var(--rad);padding:12px;margin:10px 0">
         <div style="font-size:.75rem;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">🔧 Panel Admin</div>
         <div style="font-size:.875rem;color:var(--tx2);margin-bottom:6px">Activar cuenta Pro por email:</div>
-        <div style="display:flex;gap:6px">
+        <div style="display:flex;gap:6px;margin-bottom:5px">
           <input id="admin-email-input" type="email" placeholder="usuario@email.com" style="flex:1;font-size:.875rem;padding:5px 8px">
-          <button class="btn sm primary" onclick="adminActivatePro()">Activar</button>
         </div>
-        <div style="font-size:.75rem;color:var(--tx3);margin-top:6px">Esto guarda el email en la lista Pro del sistema.</div>
+        <div style="display:flex;gap:5px">
+          <button class="btn sm primary" onclick="adminActivatePro(30)" style="flex:1">✓ Activar 30d</button>
+          <button class="btn sm" onclick="adminRenewPro()" style="flex:1;border-color:var(--ok);color:var(--ok)">↻ Renovar</button>
+        </div>
+        <div style="font-size:.75rem;color:var(--tx3);margin-top:5px">Activar: nuevo usuario. Renovar: extiende 30 dias desde hoy.</div>
       </div>`:
       isPro()?`<div style="font-size:.875rem;color:var(--ok);margin-top:4px">⭐ Plan Pro activo</div>`
       :`<div style="font-size:.875rem;color:var(--err);margin-top:4px;cursor:pointer" onclick="closeModal();showModal('subscription')">Sin plan activo — Ver planes ›</div>`;
@@ -1912,43 +1917,142 @@ function applyTemplate(idx){
 
 
 // ── ADMIN ──────────────────────────────────────────────────────────────────
-async function adminActivatePro(){
+async function adminActivatePro(extraDays=30){
   const emailInput = document.getElementById('admin-email-input');
   const email = emailInput?.value?.trim();
-  if(!email){toast("Ingresá un email",false);return;}
-  // Save pro user list in Supabase budgets table using a special admin record
+  if(!email){toast("Ingresa un email",false);return;}
+  const expires = new Date();
+  expires.setDate(expires.getDate() + extraDays);
   try{
     const {error} = await _SB.from('pro_users').upsert({
       email: email,
       activated_by: _user.email,
-      activated_at: new Date().toISOString()
+      activated_at: new Date().toISOString(),
+      expires_at: expires.toISOString()
     },{onConflict:'email'});
     if(error) throw error;
-    toast("✓ " + email + " activado como Pro");
+    toast("Pro activado hasta " + expires.toLocaleDateString('es-PY') + " para " + email);
     if(emailInput) emailInput.value='';
+    renderUserChip();
   } catch(e){
-    // Table might not exist yet — store locally as fallback
-    const proList = JSON.parse(localStorage.getItem('ppy_pro_users')||'[]');
-    if(!proList.includes(email)) proList.push(email);
-    localStorage.setItem('ppy_pro_users', JSON.stringify(proList));
-    toast("✓ " + email + " activado (local)");
-    if(emailInput) emailInput.value='';
+    toast("Error: " + e.message, false);
   }
+}
+
+async function adminRenewPro(){
+  const emailInput = document.getElementById('admin-email-input');
+  const email = emailInput?.value?.trim();
+  if(!email){toast("Ingresa un email",false);return;}
+  // Get current expiry and extend 30 days from today or from current expiry, whichever is later
+  try{
+    const {data} = await _SB.from('pro_users').select('expires_at').eq('email',email).single();
+    const base = data?.expires_at ? new Date(Math.max(new Date(data.expires_at), new Date())) : new Date();
+    base.setDate(base.getDate()+30);
+    const {error} = await _SB.from('pro_users').upsert({
+      email, activated_by: _user.email,
+      activated_at: new Date().toISOString(),
+      expires_at: base.toISOString()
+    },{onConflict:'email'});
+    if(error) throw error;
+    toast("Renovado hasta " + base.toLocaleDateString('es-PY'));
+    if(emailInput) emailInput.value='';
+  } catch(e){ toast("Error: "+e.message,false); }
 }
 
 async function checkIfUserIsPro(){
   if(!_user) return;
-  if(isAdmin()){ state.isPro=true; return; }
-  // Check Supabase pro_users table
+  if(isAdmin()){ state.isPro=true; state.proExpiresAt=null; renderUserChip(); return; }
   try{
-    const {data} = await _SB.from('pro_users').select('email').eq('email',_user.email).single();
-    state.isPro = !!data;
+    const {data} = await _SB.from('pro_users').select('email,expires_at').eq('email',_user.email).single();
+    if(data){
+      state.proExpiresAt = data.expires_at || null;
+      const expired = data.expires_at && new Date(data.expires_at) < new Date();
+      state.isPro = !expired;
+      state.proExpired = expired;
+    } else {
+      state.isPro = false; state.proExpired = false; state.proExpiresAt = null;
+    }
   } catch(e){
-    // Fallback to localStorage
-    const proList = JSON.parse(localStorage.getItem('ppy_pro_users')||'[]');
-    state.isPro = proList.includes(_user.email);
+    state.isPro = false; state.proExpired = false; state.proExpiresAt = null;
   }
   renderUserChip();
+  checkSubscriptionWarning();
+}
+
+
+// ── SUBSCRIPTION WARNING & BLOCK ─────────────────────────────────────────────
+function checkSubscriptionWarning(){
+  if(!_user || isAdmin()) return;
+  // Remove any existing warning
+  const existing = document.getElementById('sub-warning-bar');
+  if(existing) existing.remove();
+
+  if(state.proExpired){
+    showSubscriptionBlock();
+    return;
+  }
+  if(!state.proExpiresAt) return;
+
+  const expires = new Date(state.proExpiresAt);
+  const today = new Date();
+  const daysLeft = Math.ceil((expires - today) / 86400000);
+
+  // Aviso desde dia 5 restantes
+  if(daysLeft <= 5 && daysLeft > 0){
+    showSubscriptionBanner(daysLeft, 'urgent');
+  } else if(daysLeft <= 25 && daysLeft > 5){
+    showSubscriptionBanner(daysLeft, 'warn');
+  }
+}
+
+function showSubscriptionBanner(daysLeft, level){
+  const existing = document.getElementById('sub-warning-bar');
+  if(existing) existing.remove();
+  const bar = document.createElement('div');
+  bar.id = 'sub-warning-bar';
+  const isUrgent = daysLeft <= 3;
+  bar.style.cssText = `position:fixed;top:52px;left:0;right:0;z-index:90;padding:8px 16px;display:flex;align-items:center;justify-content:space-between;font-size:.875rem;font-weight:600;
+    background:${isUrgent ? 'rgba(248,113,113,.15)' : 'rgba(251,191,36,.12)'};
+    border-bottom:1px solid ${isUrgent ? 'rgba(248,113,113,.4)' : 'rgba(251,191,36,.4)'};
+    color:${isUrgent ? '#f87171' : '#fbbf24'};`;
+  bar.innerHTML = `
+    <span>${isUrgent ? '🔴' : '⚠️'} Tu suscripcion vence en <strong>${daysLeft} dia${daysLeft!==1?'s':''}</strong>. Renova para seguir guardando en la nube.</span>
+    <button onclick="showModal('subscription')" style="padding:4px 12px;border-radius:999px;border:1px solid currentColor;background:transparent;color:inherit;cursor:pointer;font-weight:700;font-size:.8rem;white-space:nowrap">Renovar</button>
+  `;
+  document.getElementById('app').insertBefore(bar, document.getElementById('section-budget'));
+}
+
+function showSubscriptionBlock(){
+  // Remove warning bar if any
+  const w = document.getElementById('sub-warning-bar');
+  if(w) w.remove();
+  // Show fullscreen block overlay (data is safe, just cloud features blocked)
+  const existing = document.getElementById('sub-block-overlay');
+  if(existing) return;
+  const overlay = document.createElement('div');
+  overlay.id = 'sub-block-overlay';
+  overlay.style.cssText = `position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.85);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;`;
+  overlay.innerHTML = `
+    <div style="background:var(--sur);border:1px solid var(--bor);border-radius:12px;padding:32px;max-width:420px;width:100%;text-align:center;box-shadow:var(--sh)">
+      <div style="font-size:2.5rem;margin-bottom:12px">⏸</div>
+      <div style="font-family:var(--font-display);font-size:1.3rem;font-weight:800;color:var(--tx);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em">Suscripcion vencida</div>
+      <div style="font-size:.875rem;color:var(--tx2);line-height:1.6;margin-bottom:20px">
+        Tu plan mensual ha vencido.<br>
+        <strong style="color:var(--ok)">Tus datos estan seguros</strong> — ningun presupuesto fue eliminado.<br><br>
+        Renova tu suscripcion para volver a guardar y sincronizar en la nube.
+      </div>
+      <div style="background:var(--sur2);border:1px solid var(--bor);border-radius:var(--rad);padding:14px;margin-bottom:16px;font-size:.875rem;color:var(--tx2)">
+        📱 Contactanos: <strong>0992 311 700</strong><br>
+        ✉️ <strong>voccelstudio@gmail.com</strong>
+      </div>
+      <button onclick="showModal('subscription')" style="width:100%;padding:12px;background:var(--acc);color:var(--bg);border:none;border-radius:var(--rad);font-weight:700;font-size:1rem;cursor:pointer;margin-bottom:8px">Ver opciones de pago</button>
+      <button onclick="document.getElementById('sub-block-overlay').remove();toast('Modo lectura — los datos estan seguros')" style="width:100%;padding:8px;background:transparent;border:1px solid var(--bor);border-radius:var(--rad);color:var(--tx3);cursor:pointer;font-size:.875rem">Continuar en modo lectura</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  // Block save/load in cloud
+  const origSbSave = window.sbSaveBudgets;
+  window.sbSaveBudgets = async()=>{ toast("Suscripcion vencida — renova para guardar",false); };
 }
 
 // ── MOBILE FAB ──────────────────────────────────────────────────────────────────────────
