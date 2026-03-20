@@ -345,7 +345,19 @@ table.tbl{width:100%;border-collapse:collapse;font-size:1rem;}
 .hist-pct.up{color:var(--err);}
 .hist-pct.dn{color:var(--ok);}
 /* ── FIRMA DIGITAL ── */
-.sign-canvas{border:1px solid var(--bor);border-radius:var(--rad);background:var(--sur2);touch-action:none;cursor:crosshair;display:block;width:100%;}
+.sign-canvas{border:1px solid var(--bor);border-radius:var(--rad);background:var(--sur2);touch-action:none;cursor:crosshair;display:block;width:100%;height:120px;}
+.sign-actions{display:flex;gap:6px;margin-top:6px;}
+/* ── LOGO UPLOAD ── */
+.logo-upload-area{border:2px dashed var(--bor);border-radius:var(--rad);padding:16px;text-align:center;cursor:pointer;transition:all .15s;margin-bottom:12px;}
+.logo-upload-area:hover{border-color:var(--acc);}
+.logo-preview{max-height:60px;max-width:180px;object-fit:contain;border-radius:4px;}
+.logo-placeholder{color:var(--tx3);font-size:.875rem;}
+/* ── PAYMENT INFO ── */
+.payment-box{background:var(--sur2);border:1px solid var(--bor);border-radius:var(--rad);padding:16px;margin:10px 0;}
+.payment-amount{font-family:var(--font-display);font-size:2rem;font-weight:800;color:var(--acc);margin:8px 0;}
+.payment-bank{font-size:.875rem;color:var(--tx2);line-height:1.8;}
+.payment-bank strong{color:var(--tx);}
+.payment-badge{display:inline-block;background:var(--matbg);color:var(--mat);border:1px solid rgba(52,211,153,.3);padding:2px 8px;border-radius:999px;font-size:.875rem;font-weight:700;margin-bottom:8px;}
 /* ── ALERTAS ── */
 .alert-row{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--rad);margin-bottom:5px;}
 .alert-row.warn{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);}
@@ -380,6 +392,47 @@ table.tbl{width:100%;border-collapse:collapse;font-size:1rem;}
 .user-avatar{width:22px;height:22px;border-radius:50%;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;color:var(--bg);}
 .cloud-badge{font-size:.875rem;background:rgba(96,165,250,.15);color:var(--blue);border:1px solid rgba(96,165,250,.3);padding:2px 7px;border-radius:999px;font-weight:600;white-space:nowrap;}
 
+
+/* ── RESPONSIVE MOBILE ── */
+@media(max-width:768px){
+  .hdr{padding:0 8px;gap:3px;height:auto;min-height:48px;flex-wrap:nowrap;overflow-x:auto;}
+  .logo{font-size:.95rem;}
+  .db-badge{display:none;}
+  #btn-prices,#btn-themes,#btn-dashboard{display:none;}
+  .main{grid-template-columns:1fr;gap:8px;padding:8px;}
+  .catalog-col{order:2;}
+  .budget-col{order:1;}
+  .cat-scroll{max-height:38vh;}
+  .grid2{grid-template-columns:1fr;}
+  .tbl th:nth-child(5),.tbl td:nth-child(5){display:none;}
+  .pgrid{grid-template-columns:1fr;}
+  .theme-grid{grid-template-columns:repeat(2,1fr);}
+  .dash-grid{grid-template-columns:repeat(2,1fr);}
+  .tmpl-grid{grid-template-columns:1fr 1fr;}
+  .modal{padding:14px;max-height:96vh;}
+  .two-col,.three-col{grid-template-columns:1fr;}
+  .pdf-theme-grid{grid-template-columns:repeat(2,1fr);}
+  .export-options{grid-template-columns:1fr;}
+  .auth-box{padding:20px;margin:8px;}
+  .m2-panel{flex-wrap:wrap;}
+  .tot-main .tot-val{font-size:1.1rem;}
+  .bud-hdr{gap:4px;}
+  .mobile-fab{display:flex!important;}
+}
+@media(max-width:480px){
+  .nbtn{padding:3px 7px;font-size:.75rem;}
+  .main{padding:5px;}
+  .dash-grid{grid-template-columns:1fr;}
+  .tmpl-grid{grid-template-columns:1fr;}
+  .theme-grid{grid-template-columns:repeat(2,1fr);}
+}
+/* Mobile FAB menu */
+.mobile-fab{display:none;position:fixed;bottom:20px;right:20px;z-index:150;flex-direction:column;align-items:flex-end;gap:8px;}
+.mobile-fab-main{width:52px;height:52px;border-radius:50%;background:var(--acc);border:none;color:var(--bg);font-size:1.5rem;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;}
+.mobile-fab-items{display:flex;flex-direction:column;gap:6px;align-items:flex-end;}
+.mobile-fab-item{background:var(--sur);border:1px solid var(--bor);border-radius:999px;padding:7px 14px;font-size:.875rem;font-weight:600;color:var(--tx);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3);white-space:nowrap;display:flex;align-items:center;gap:6px;}
+.mobile-fab-item:hover{background:var(--acc);color:var(--bg);border-color:var(--acc);}
+.mobile-fab-items.closed{display:none;}
 </style>
 </head>
 <body>
@@ -393,6 +446,7 @@ table.tbl{width:100%;border-collapse:collapse;font-size:1rem;}
     <button class="nbtn" id="btn-dashboard" onclick="setSection('dashboard')">Dashboard</button>
     <button class="nbtn" onclick="showModal('profile')">Perfil</button>
     <div id="user-chip-area" style="display:flex;align-items:center;gap:6px;margin-left:4px"></div>
+    <button class="nbtn" style="border-color:rgba(52,211,153,.4);color:var(--ok);font-weight:700" onclick="showModal('subscription')">⭐ Pro</button>
     <button class="nbtn" onclick="showModal('load')">Cargar</button>
     <button class="nbtn" onclick="showModal('save')">Guardar</button>
     <button class="nbtn xls" onclick="showModal('export')">Exportar</button>
@@ -405,6 +459,19 @@ table.tbl{width:100%;border-collapse:collapse;font-size:1rem;}
   <div id="section-dashboard" style="display:none"></div>
   <div id="modal-area"></div>
   <div id="toast-el" class="toast" style="display:none"></div>
+  <!-- Mobile FAB -->
+  <div class="mobile-fab" id="mobile-fab">
+    <div class="mobile-fab-items closed" id="fab-items">
+      <div class="mobile-fab-item" onclick="setSection('budget');closeFab()">📋 Presupuesto</div>
+      <div class="mobile-fab-item" onclick="setSection('prices');closeFab()">💰 Precios</div>
+      <div class="mobile-fab-item" onclick="setSection('dashboard');closeFab()">📊 Dashboard</div>
+      <div class="mobile-fab-item" onclick="showModal('profile');closeFab()">👤 Perfil</div>
+      <div class="mobile-fab-item" onclick="generarPDF();closeFab()">📄 PDF</div>
+      <div class="mobile-fab-item" onclick="showModal('save');closeFab()">💾 Guardar</div>
+      <div class="mobile-fab-item" onclick="showModal('load');closeFab()">📂 Cargar</div>
+    </div>
+    <button class="mobile-fab-main" onclick="toggleFab()" id="fab-btn">☰</button>
+  </div>
 </div>
 
 <script>
@@ -1055,7 +1122,8 @@ function renderBudget(){
           <input class="sm" type="number" min="0" max="999" value="${state.profitPct}" style="width:52px" oninput="state.profitPct=parseFloat(this.value)||0;renderTotals();save()">
           <span style="font-size:.875rem;color:var(--tx3)">%</span>
           <span style="font-size:.875rem;font-weight:600;white-space:nowrap;margin-left:8px">Validez:</span>
-          <input class="sm" type="number" min="1" value="${state.validDays}" style="width:44px" oninput="state.validDays=parseInt(this.value)||30;renderTotals();save()">
+          <input class="sm" type="number" min="1" value="${state.validDays}" style="width:58px;min-width:50px" oninput="state.validDays=parseInt(this.value)||30;renderTotals();save()">
+          <span style="font-size:.875rem;color:var(--tx3);white-space:nowrap">días</span>
           <span style="font-size:.875rem;color:var(--tx3)">días</span>
         </div>
         <div class="opt-row">
@@ -1290,9 +1358,17 @@ function generarPDF(){
   let y=0;
   // Header
   doc.setFillColor(...C.hdrBg);doc.rect(0,0,W,36,"F");
-  doc.setFillColor(255,255,255,20);doc.circle(M+10,18,10,"F");
-  doc.setTextColor(...C.hdrTx);doc.setFontSize(9);doc.setFont("helvetica","bold");
-  doc.text((p.company||p.professional||"PY").substring(0,2).toUpperCase(),M+5.5,21);
+  if(state.logoDataUrl){
+    try{doc.addImage(state.logoDataUrl,"PNG",M,8,24,16);}catch(e){
+      doc.setFillColor(255,255,255,20);doc.circle(M+10,18,10,"F");
+      doc.setTextColor(...C.hdrTx);doc.setFontSize(9);doc.setFont("helvetica","bold");
+      doc.text((p.company||p.professional||"PY").substring(0,2).toUpperCase(),M+5.5,21);
+    }
+  } else {
+    doc.setFillColor(255,255,255,20);doc.circle(M+10,18,10,"F");
+    doc.setTextColor(...C.hdrTx);doc.setFontSize(9);doc.setFont("helvetica","bold");
+    doc.text((p.company||p.professional||"PY").substring(0,2).toUpperCase(),M+5.5,21);
+  }
   const tX=M+24;
   doc.setFontSize(13);doc.setFont("helvetica","bold");
   doc.text(pdfTxt(p.company||p.professional||"PresupuestadorPY"),tX,13);
@@ -1392,6 +1468,17 @@ function generarPDF(){
     doc.setFontSize(7.5);doc.setFont("helvetica","bold");doc.setTextColor(...C.accentBg);doc.text("NOTAS Y CONDICIONES:",M,y);y+=5;
     doc.setFont("helvetica","normal");doc.setTextColor(...C.mutedTx);
     const nl2=doc.splitTextToSize(pdfTxt(state.notes),W-M*2);doc.text(nl2,M,y);
+  }
+  // Signature
+  if(state.signDataUrl){
+    const sigY=y+2;
+    if(sigY+22<280){
+      doc.setFontSize(7);doc.setFont("helvetica","normal");doc.setTextColor(...C.mutedTx);
+      doc.text("Firma profesional:",M,sigY+4);
+      try{doc.addImage(state.signDataUrl,"PNG",M,sigY+6,50,14);}catch(e){}
+      doc.setDrawColor(...C.borderC);doc.setLineWidth(0.3);doc.line(M,sigY+21,M+60,sigY+21);
+      doc.text(pdfTxt(p.professional||p.company||""),M,sigY+25);
+    }
   }
   // Footer
   const pages=doc.internal.getNumberOfPages();
@@ -1495,6 +1582,54 @@ function showModal(type){
     </div></div>`;
   }
 
+  else if(type==="subscription"){
+    el.innerHTML=`<div class="overlay" onclick="if(event.target===this)closeModal()"><div class="modal" style="max-width:480px">
+      <div class="modal-title">PresupuestadorPY Pro<button class="delbtn" onclick="closeModal()">✕</button></div>
+      <div style="text-align:center;padding:8px 0 16px">
+        <div class="payment-badge">✓ ACCESO COMPLETO</div>
+        <div class="payment-amount">₲ 90.000 / mes</div>
+        <div style="font-size:.875rem;color:var(--tx3);margin-bottom:16px">Equivalente aprox. USD 12/mes · Cancelá cuando quieras</div>
+      </div>
+      <div style="font-size:.875rem;color:var(--tx2);font-weight:600;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">¿Qué incluye?</div>
+      <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:16px">
+        ${["Presupuestos ilimitados guardados en la nube","Base de precios actualizada del mercado PY","PDF profesional con tu logo y firma","Exportación Excel / CSV","12 temas visuales + 6 temas PDF","Soporte por WhatsApp"].map(f=>`<div style="font-size:.875rem;color:var(--tx2);padding:4px 0;border-bottom:1px solid var(--bor)">✓ ${f}</div>`).join("")}
+      </div>
+      <div style="font-size:.875rem;color:var(--tx2);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Cómo pagar</div>
+      <div class="payment-box">
+        <div class="payment-bank">
+          <strong>Transferencia Bancaria</strong><br>
+          Banco: <strong>Banco Continental</strong><br>
+          Cuenta: <strong>0-010-1-001234-5</strong><br>
+          Titular: <strong>VOCCEL Studio SRL</strong><br>
+          RUC: <strong>80123456-7</strong><br><br>
+          <strong>Billetera Digital</strong><br>
+          Tigo Money / Personal Pay: <strong>+595 981 123 456</strong><br>
+          A nombre de: <strong>VOCCEL Studio</strong>
+        </div>
+      </div>
+      <div style="background:var(--ivabg);border:1px solid var(--iva);border-radius:var(--rad);padding:10px 13px;font-size:.875rem;color:var(--tx2);margin-top:8px">
+        📩 Luego de transferir, enviá el comprobante a <strong>hola@voccel.com.py</strong> o por WhatsApp al <strong>+595 981 123 456</strong> y activamos tu cuenta en menos de 24hs.
+      </div>
+      <div class="modal-acts"><button class="btn" onclick="closeModal()">Cerrar</button>
+        <button class="btn primary" onclick="window.open('https://wa.me/595981123456?text=Hola!+Quiero+activar+PresupuestadorPY+Pro','_blank')">📱 WhatsApp</button>
+      </div>
+    </div></div>`;
+  }
+
+  else if(type==="signature"){
+    el.innerHTML=`<div class="overlay" onclick="if(event.target===this)closeModal()"><div class="modal" style="max-width:420px">
+      <div class="modal-title">Firma Digital<button class="delbtn" onclick="closeModal()">✕</button></div>
+      <p style="font-size:.875rem;color:var(--tx3);margin-bottom:10px">Dibujá tu firma. Aparecerá en el PDF al pie del presupuesto.</p>
+      <canvas id="sign-canvas" class="sign-canvas" width="500" height="120"></canvas>
+      <div class="sign-actions">
+        <button class="btn sm danger" onclick="clearSignature()">Borrar</button>
+        <button class="btn sm primary" onclick="saveSignature()">Guardar firma</button>
+      </div>
+      ${state.signDataUrl ? `<div style="margin-top:10px"><div style="font-size:.875rem;color:var(--tx3);margin-bottom:4px">Firma guardada:</div><img src="${state.signDataUrl}" style="border:1px solid var(--bor);border-radius:var(--rad);background:#fff;padding:4px;max-width:100%;height:50px;object-fit:contain"></div>` : ''}
+    </div></div>`;
+    initSignatureCanvas();
+  }
+
   else if(type==="profile"){
     const p=state.profile;
     const pdfThemes=[
@@ -1541,8 +1676,18 @@ function showModal(type){
         <input id="p-wa" value="${(p.whatsapp||"").replace(/"/g,'&quot;')}" placeholder="WhatsApp: +595 9XX XXXXXX" class="mb7">
       </div>
       <input id="p-web" value="${(p.website||"").replace(/"/g,'&quot;')}" placeholder="Sitio web: www.tuestudio.com.py" class="mb7">
+      <div class="slbl">Logo del Estudio (aparece en el PDF)</div>
+      <div class="logo-upload-area" onclick="document.getElementById('logo-file-input').click()">
+        ${state.logoDataUrl ? `<img src="${state.logoDataUrl}" class="logo-preview" alt="Logo">` : '<div class="logo-placeholder">📷 Hacé clic para subir tu logo<br><span style="font-size:.75rem">PNG, JPG — recomendado 300x100px</span></div>'}
+      </div>
+      <input type="file" id="logo-file-input" accept="image/*" style="display:none" onchange="uploadLogo(this)">
+      ${state.logoDataUrl ? `<button class="btn sm danger" onclick="state.logoDataUrl='';save();showModal('profile')" style="margin-bottom:12px">✕ Quitar logo</button>` : ''}
       <div class="slbl">Tema del PDF</div>
       <div class="pdf-theme-grid">${pdfCards}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--bor)">
+        <button class="btn sm" onclick="showModal('signature')">✍️ Firma digital</button>
+        <button class="btn sm" style="color:var(--ok);border-color:var(--ok)" onclick="showModal('subscription')">⭐ Suscripcion Pro</button>
+      </div>
       <div class="modal-acts">
         <button class="btn" onclick="closeModal()">Cancelar</button>
         <button class="btn primary" onclick="doSaveProfile()">Guardar Perfil</button>
@@ -1693,7 +1838,10 @@ function renderDashboard(){
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <div class="sec-lbl">Alertas de vencimiento</div>
-          <span style="font-size:1rem;color:var(--tx3)">Próximos 15 días</span>
+          <div style="display:flex;gap:6px;align-items:center">
+            <span style="font-size:1rem;color:var(--tx3)">Próximos 15 días</span>
+            <button class="btn sm" onclick="checkVencimientosYNotificar()" title="Enviarme email con los que vencen en 7 dias">📧 Notificarme</button>
+          </div>
         </div>
         ${alertHtml}
       </div>
@@ -1742,6 +1890,84 @@ function applyTemplate(idx){
   state.m2Area=t.name.includes("60m²")?60:t.name.includes("120m²")?120:t.name.includes("100m²")?100:30;
   setSection("budget");save();renderBudget();
   toast('Plantilla "'+t.name+'" cargada — '+added+' ítems ✓');
+}
+
+
+// ── MOBILE FAB ──────────────────────────────────────────────────────────────────────────
+let _fabOpen=false;
+function toggleFab(){
+  _fabOpen=!_fabOpen;
+  document.getElementById("fab-items").className="mobile-fab-items"+(_fabOpen?"":" closed");
+  document.getElementById("fab-btn").textContent=_fabOpen?"✕":"☰";
+}
+function closeFab(){_fabOpen=false;document.getElementById("fab-items").className="mobile-fab-items closed";document.getElementById("fab-btn").textContent="☰";}
+
+// ── LOGO UPLOAD ───────────────────────────────────────────────────────────────────────
+function uploadLogo(input){
+  const file=input.files[0];if(!file)return;
+  if(file.size>500000){toast("Logo muy grande. Maximo 500KB",false);return;}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    state.logoDataUrl=e.target.result;
+    save();showModal("profile");
+    toast("Logo guardado ✓");
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── FIRMA DIGITAL ───────────────────────────────────────────────────────────────────────
+let _signDraw=false,_signCtx=null,_signCanvas=null;
+function initSignatureCanvas(){
+  _signCanvas=document.getElementById("sign-canvas");
+  if(!_signCanvas)return;
+  _signCtx=_signCanvas.getContext("2d");
+  _signCtx.strokeStyle="#1a1a1a";_signCtx.lineWidth=2;_signCtx.lineCap="round";_signCtx.lineJoin="round";
+  // Scale canvas for retina
+  const rect=_signCanvas.getBoundingClientRect();
+  _signCanvas.width=rect.width*window.devicePixelRatio||500;
+  _signCanvas.height=120*window.devicePixelRatio||120;
+  _signCtx.scale(window.devicePixelRatio,window.devicePixelRatio);
+  _signCtx.strokeStyle="#1a1a1a";_signCtx.lineWidth=2;_signCtx.lineCap="round";
+  // Mouse events
+  _signCanvas.addEventListener("mousedown",e=>{_signDraw=true;_signCtx.beginPath();const r=_signCanvas.getBoundingClientRect();_signCtx.moveTo(e.clientX-r.left,e.clientY-r.top);});
+  _signCanvas.addEventListener("mousemove",e=>{if(!_signDraw)return;const r=_signCanvas.getBoundingClientRect();_signCtx.lineTo(e.clientX-r.left,e.clientY-r.top);_signCtx.stroke();});
+  _signCanvas.addEventListener("mouseup",()=>_signDraw=false);
+  _signCanvas.addEventListener("mouseleave",()=>_signDraw=false);
+  // Touch events
+  _signCanvas.addEventListener("touchstart",e=>{e.preventDefault();_signDraw=true;_signCtx.beginPath();const r=_signCanvas.getBoundingClientRect();const t=e.touches[0];_signCtx.moveTo(t.clientX-r.left,t.clientY-r.top);},{passive:false});
+  _signCanvas.addEventListener("touchmove",e=>{e.preventDefault();if(!_signDraw)return;const r=_signCanvas.getBoundingClientRect();const t=e.touches[0];_signCtx.lineTo(t.clientX-r.left,t.clientY-r.top);_signCtx.stroke();},{passive:false});
+  _signCanvas.addEventListener("touchend",()=>_signDraw=false);
+}
+function clearSignature(){if(_signCtx&&_signCanvas){_signCtx.clearRect(0,0,_signCanvas.width,_signCanvas.height);}}
+function saveSignature(){
+  if(!_signCanvas)return;
+  state.signDataUrl=_signCanvas.toDataURL("image/png");
+  save();closeModal();toast("Firma guardada ✓");
+}
+
+// ── NOTIFICACION VENCIMIENTO EMAIL ─────────────────────────────────────────────
+function checkVencimientosYNotificar(){
+  const hoy=new Date();
+  const vencenPronto=state.budgets.filter(b=>{
+    const emision=new Date(b.date);
+    const vence=new Date(emision.getTime()+(b.validDays||30)*86400000);
+    const diff=Math.ceil((vence-hoy)/86400000);
+    return diff>=0&&diff<=7;
+  });
+  if(vencenPronto.length===0)return;
+  const email=_user?.email;
+  if(!email)return;
+  // Armar mailto con lista de vencimientos
+  const lista=vencenPronto.map(b=>{
+    const emision=new Date(b.date);
+    const vence=new Date(emision.getTime()+(b.validDays||30)*86400000);
+    const diff=Math.ceil((vence-new Date())/86400000);
+    return `- Nº${String(b.num||0).padStart(4,"0")} ${b.projectName} (${b.clientName||"sin cliente"}) - vence en ${diff} dias`;
+  }).join("\n");
+  const asunto=encodeURIComponent(`[PresupuestadorPY] ${vencenPronto.length} presupuesto${vencenPronto.length>1?"s":""}  por vencer`);
+  const cuerpo=encodeURIComponent(`Hola,\n\nEstos presupuestos vencen en los proximos 7 dias:\n\n${lista}\n\nIngresa a https://voccelstudio.github.io/presupuestadorpy para renovarlos.\n\nPresupuestadorPY`);
+  window.open(`mailto:${email}?subject=${asunto}&body=${cuerpo}`,"_blank");
+  toast(`${vencenPronto.length} presupuesto${vencenPronto.length>1?"s":""} por vencer – email listo`);
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────
